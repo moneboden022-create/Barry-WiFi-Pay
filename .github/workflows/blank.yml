@@ -1,0 +1,115 @@
+name: Barry WiFi Pay - Build All
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  # ✅ Build EXE Windows
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if exist requirements.txt ( pip install -r requirements.txt )
+
+      - name: Build EXE with PyInstaller
+        run: |
+          pip install pyinstaller
+          pyinstaller --onefile main.py
+        # ⚠️ Si ton fichier principal ne s’appelle pas main.py,
+        # remplace main.py par le nom de ton fichier (ex: app.py)
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryWiFiPay-Windows
+          path: dist/*.exe
+
+  # ✅ Build binaire Linux
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build Linux binary
+        run: |
+          pip install pyinstaller
+          pyinstaller --onefile main.py
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryWiFiPay-Linux
+          path: dist/*
+
+  # 🌐 (option) Build version Web – à adapter selon ton projet
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Placeholder Web build
+        run: |
+          echo "Ici on mettra la commande pour builder la version Web (Django/React, etc.)."
+          mkdir -p web_build
+          echo "Build web terminé" > web_build/readme.txt
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryWiFiPay-Web
+          path: web_build/*
+
+  # 📱 (option) Build APK Android avec Buildozer (peut être long)
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libsqlite3-dev libssl-dev \
+              libffi-dev build-essential openjdk-17-jdk
+
+      - name: Install Buildozer
+        run: |
+          pip3 install --upgrade pip
+          pip3 install cython buildozer
+
+      - name: Build APK
+        run: |
+          ls
+          # ⚠️ Assure-toi d'avoir un fichier buildozer.spec à la racine du projet
+          buildozer android debug
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryWiFiPay-Android
+          path: bin/*.apk
