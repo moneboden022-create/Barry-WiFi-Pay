@@ -1,4 +1,4 @@
-name: Barry WiFi Pay - Build All
+name: Build Barry PayWiFi Flutter App for ALL Platforms
 
 on:
   push:
@@ -7,109 +7,143 @@ on:
 
 jobs:
 
-  # ✅ Build EXE Windows
-  windows-exe:
-    runs-on: windows-latest
+  # 🟢 1. Build Web + Linux (Ubuntu runner)
+  build-web-linux:
+    name: Build Web & Linux
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app_flutter
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          python-version: '3.11'
+          channel: stable
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          if exist requirements.txt ( pip install -r requirements.txt )
+      - name: Flutter Pub Get
+        run: flutter pub get
 
-      - name: Build EXE with PyInstaller
+      - name: Build Web
+        run: flutter build web --release
+
+      - name: Build Linux
         run: |
-          pip install pyinstaller
-          pyinstaller --onefile main.py
-        # ⚠️ Si ton fichier principal ne s’appelle pas main.py,
-        # remplace main.py par le nom de ton fichier (ex: app.py)
+          sudo apt update
+          sudo apt install -y clang cmake ninja-build pkg-config libgtk-3-dev
+          flutter config --enable-linux-desktop
+          flutter build linux --release
+
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryPayWiFi-Web
+          path: app_flutter/build/web/
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryPayWiFi-Linux
+          path: app_flutter/build/linux/x64/release/
+
+  # 🟦 2. Build Windows EXE
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app_flutter
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      - name: Build Windows EXE
+        run: flutter build windows --release
 
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
         with:
-          name: BarryWiFiPay-Windows
-          path: dist/*.exe
+          name: BarryPayWiFi-Windows
+          path: app_flutter/build/windows/runner/Release/
 
-  # ✅ Build binaire Linux
-  linux-build:
+  # 🟧 3. Build Android APK + AAB
+  build-android:
+    name: Build Android
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app_flutter
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          python-version: '3.11'
+          channel: stable
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Build Linux binary
-        run: |
-          pip install pyinstaller
-          pyinstaller --onefile main.py
-
-      - name: Upload Linux binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryWiFiPay-Linux
-          path: dist/*
-
-  # 🌐 (option) Build version Web – à adapter selon ton projet
-  web-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Placeholder Web build
-        run: |
-          echo "Ici on mettra la commande pour builder la version Web (Django/React, etc.)."
-          mkdir -p web_build
-          echo "Build web terminé" > web_build/readme.txt
-
-      - name: Upload Web build
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryWiFiPay-Web
-          path: web_build/*
-
-  # 📱 (option) Build APK Android avec Buildozer (peut être long)
-  android-apk:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libsqlite3-dev libssl-dev \
-              libffi-dev build-essential openjdk-17-jdk
-
-      - name: Install Buildozer
-        run: |
-          pip3 install --upgrade pip
-          pip3 install cython buildozer
+      - name: Flutter Pub Get
+        run: flutter pub get
 
       - name: Build APK
-        run: |
-          ls
-          # ⚠️ Assure-toi d'avoir un fichier buildozer.spec à la racine du projet
-          buildozer android debug
+        run: flutter build apk --release
 
-      - name: Upload Android APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: BarryWiFiPay-Android
-          path: bin/*.apk
+          name: BarryPayWiFi-APK
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build AAB (Play Store)
+        run: flutter build appbundle --release
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryPayWiFi-AAB
+          path: app_flutter/build/app/outputs/bundle/release/app-release.aab
+
+  # 🍏 4. iOS BUILD (NE MARCHE QUE SUR RUNNER MAC)
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app_flutter
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarryPayWiFi-iOS
+          path: app_flutter/build/ios/iphoneos/
