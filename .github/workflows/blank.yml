@@ -1,89 +1,51 @@
-name: Build Barry PayWIFI Flutter App for ALL Platforms
+name: Build Barry_PayWiFi Flutter App for ALL Platforms
 
 on:
   workflow_dispatch:
 
 jobs:
 
-  build-android:
-    name: Build Android
+  Build-Android:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app_flutter
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Flutter Pub Get
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Build AAB (Play Store)
-        run: flutter build appbundle --release
+      - run: flutter pub get
+      - run: flutter build apk --release
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
-          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Upload AAB
-        uses: actions/upload-artifact@v3
-        with:
-          name: Android-AAB
-          path: app_flutter/build/app/outputs/bundle/release/app-release.aab
 
-  build-linux-web:
-    name: Build Web & Linux
+  Build-Web-Linux:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app_flutter
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgtk-3-dev \
-            clang \
-            cmake \
-            ninja-build \
-            pkg-config \
-            liblzma-dev
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Flutter Pub Get
-        run: flutter pub get
-
-      - name: Build Web
-        run: flutter build web --release
+      - run: flutter pub get
+      - run: flutter build web
 
       - name: Upload Web Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Web-Build
-          path: app_flutter/build/web
+          name: web-build
+          path: build/web
 
-      - name: Build Linux
-        run: flutter build linux --release
+      - run: flutter build linux
 
       - name: Upload Linux Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Linux-Build
-          path: app_flutter/build/linux/x64/release/bundle
+          name: linux-build
+          path: build/linux/x64/release/bundle
