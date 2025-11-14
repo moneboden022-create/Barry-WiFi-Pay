@@ -1,14 +1,12 @@
 plugins {
-    id "com.android.application" version "8.2.2"
-    id "org.jetbrains.kotlin.android" version "1.9.22"
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'
 }
 
 android {
     namespace "com.example.app_flutter"
-    compileSdkVersion flutter.compileSdkVersion
-
-    ndkVersion = flutter.ndkVersion
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.example.app_flutter"
@@ -32,8 +30,8 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-}
 
-flutter {
-    source = "../.."
+    flutter {
+        source = "../.."
+    }
 }
