@@ -1,20 +1,16 @@
-name: Build Barry PayWiFi Flutter App for ALL Platforms
+name: Build Barry PayWIFI Flutter App for ALL Platforms
 
 on:
   workflow_dispatch:
 
 jobs:
 
-  #---------------------------
-  # 1. BUILD ANDROID
-  #---------------------------
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: app_flutter
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,64 +30,37 @@ jobs:
         run: flutter build appbundle --release
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: BarryPayWiFi-APK
+          name: Android-APK
           path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload AAB
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: BarryPayWiFi-AAB
+          name: Android-AAB
           path: app_flutter/build/app/outputs/bundle/release/app-release.aab
 
-  #---------------------------
-  # 2. BUILD WINDOWS .EXE
-  #---------------------------
-  build-windows:
-    name: Build Windows EXE
-    runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: app_flutter
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Enable Windows Desktop
-        run: flutter config --enable-windows-desktop
-
-      - name: Flutter Pub Get
-        run: flutter pub get
-
-      - name: Build Windows EXE
-        run: flutter build windows --release
-
-      - name: Upload Windows EXE
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryPayWiFi-Windows
-          path: app_flutter/build/windows/runner/Release/
-
-  #---------------------------
-  # 3. BUILD WEB & LINUX
-  #---------------------------
-  build-web-linux:
+  build-linux-web:
     name: Build Web & Linux
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: app_flutter
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            liblzma-dev
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -104,85 +73,17 @@ jobs:
       - name: Build Web
         run: flutter build web --release
 
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Web-Build
+          path: app_flutter/build/web
+
       - name: Build Linux
         run: flutter build linux --release
 
-      - name: Upload Web Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryPayWiFi-Web
-          path: app_flutter/build/web/
-
       - name: Upload Linux Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: BarryPayWiFi-Linux
-          path: app_flutter/build/linux/x64/release/
-
-  #---------------------------
-  # 4. BUILD iOS
-  #---------------------------
-  build-ios:
-    name: Build iOS
-    runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: app_flutter
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Flutter Pub Get
-        run: flutter pub get
-
-      - name: Enable iOS
-        run: flutter config --enable-ios
-
-      - name: Build iOS (no code signing)
-        run: flutter build ios --release --no-codesign
-
-      - name: Upload iOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryPayWiFi-iOS
-          path: app_flutter/build/ios/iphoneos/
-
-  #---------------------------
-  # 5. BUILD macOS
-  #---------------------------
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: app_flutter
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Enable macOS
-        run: flutter config --enable-macos-desktop
-
-      - name: Pub Get
-        run: flutter pub get
-
-      - name: Build macOS
-        run: flutter build macos --release
-
-      - name: Upload macOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: BarryPayWiFi-macOS
-          path: app_flutter/build/macos/Build/Products/Release/
+          name: Linux-Build
+          path: app_flutter/build/linux/x64/release/bundle
