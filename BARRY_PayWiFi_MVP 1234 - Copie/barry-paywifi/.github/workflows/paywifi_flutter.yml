@@ -1,0 +1,34 @@
+name: BARRY PayWiFi Flutter Build
+
+on:
+  push:
+    paths:
+      - "app_flutter/**"
+      - ".github/workflows/paywifi_flutter.yml"
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+
+      - name: Pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build APK (release)
+        working-directory: app_flutter
+        run: flutter build apk --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: barry-paywifi-apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
