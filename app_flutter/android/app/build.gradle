@@ -1,23 +1,26 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'dev.flutter.flutter-gradle-plugin'
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
     namespace "com.example.app_flutter"
-    compileSdkVersion 34
+
+    // Flutter stable actuel utilise compileSdk 34
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.app_flutter"
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdk 21
+        targetSdk 34
         versionCode 1
         versionName "1.0"
     }
 
     buildTypes {
         release {
+            // Pour l’instant on signe avec la clé debug
             signingConfig signingConfigs.debug
         }
     }
@@ -30,8 +33,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
 
-    flutter {
-        source = "../.."
-    }
+// Indique à Gradle où est le code Flutter
+flutter {
+    source = "../.."
 }
