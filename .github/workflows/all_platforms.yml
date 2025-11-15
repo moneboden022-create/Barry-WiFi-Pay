@@ -22,11 +22,11 @@ jobs:
 
       - name: Flutter Pub Get
         run: flutter pub get
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Build APK
         run: flutter build apk --release
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Windows App
         run: flutter build windows --release
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
@@ -81,7 +81,7 @@ jobs:
 
       - name: Build Linux App
         run: flutter build linux --release
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
@@ -107,7 +107,7 @@ jobs:
 
       - name: Build Web App
         run: flutter build web --release
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
@@ -133,7 +133,7 @@ jobs:
 
       - name: Build macOS
         run: flutter build macos --release
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
@@ -159,7 +159,7 @@ jobs:
 
       - name: Build iOS (no signing)
         run: flutter build ios --release --no-codesign
-        working-directory: app_flutter
+        working-directory: .
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
