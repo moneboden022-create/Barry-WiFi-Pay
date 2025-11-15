@@ -6,8 +6,6 @@ plugins {
 
 android {
     namespace "com.example.app_flutter"
-
-    // Flutter stable actuel utilise compileSdk 34
     compileSdk 34
 
     defaultConfig {
@@ -20,7 +18,6 @@ android {
 
     buildTypes {
         release {
-            // Pour l’instant on signe avec la clé debug
             signingConfig signingConfigs.debug
         }
     }
@@ -35,7 +32,6 @@ android {
     }
 }
 
-// Indique à Gradle où est le code Flutter
 flutter {
     source = "../.."
 }
