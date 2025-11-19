@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
 import 'voucher_screen.dart';
 
 class QRScannerScreen extends StatelessWidget {
@@ -11,7 +12,6 @@ class QRScannerScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Scanner un Voucher"),
       ),
-
       body: MobileScanner(
         onDetect: (capture) {
           final List<Barcode> barcodes = capture.barcodes;
@@ -19,16 +19,20 @@ class QRScannerScreen extends StatelessWidget {
           for (final barcode in barcodes) {
             final String? code = barcode.rawValue;
 
-            if (code != null) {
-              Navigator.pop(context); // Fermer scanner
+            if (code != null && code.isNotEmpty) {
+              // On ferme l'écran du scanner
+              Navigator.pop(context);
+
+              // On ouvre l'écran Voucher avec le code scanné
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => VoucherScreen(
-                    scannedCode: code,   // ⬅ on envoie le code ici
+                    scannedCode: code,
                   ),
                 ),
               );
+              break;
             }
           }
         },
