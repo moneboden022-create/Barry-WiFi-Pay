@@ -9,23 +9,23 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: stable
 
       - name: Flutter pub get
         working-directory: .
         run: flutter pub get
 
-      - name: Build iOS (no codesign)
+      - name: Build iOS (release, no codesign)
         working-directory: .
         run: flutter build ios --release --no-codesign
 
       - name: Upload iOS build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ios-build
+          name: ios-release
           path: build/ios/iphoneos

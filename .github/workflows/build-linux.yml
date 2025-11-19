@@ -1,0 +1,40 @@
+name: build-linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev liblzma-dev libglu1-mesa-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Linux desktop
+        working-directory: .
+        run: flutter config --enable-linux-desktop
+
+      - name: Flutter pub get
+        working-directory: .
+        run: flutter pub get
+
+      - name: Build Linux (release)
+        working-directory: .
+        run: flutter build linux --release
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: build/linux/runner/release
