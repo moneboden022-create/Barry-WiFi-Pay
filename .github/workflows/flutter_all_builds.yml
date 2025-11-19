@@ -1,0 +1,130 @@
+name: Build BARRY WI-FI Apps (Android / Web / Windows / Linux)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  FLUTTER_CHANNEL: stable
+  FLUTTER_VERSION: latest
+
+jobs:
+  # -------------------- ANDROID APK --------------------
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Flutter pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Android APK (release)
+        working-directory: app_flutter
+        run: flutter build apk --release -t lib/main.dart
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: barry_wifi_android_apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+
+  # -------------------- WEB --------------------
+  build-web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Flutter pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Web (release)
+        working-directory: app_flutter
+        run: flutter build web --release
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: barry_wifi_web_build
+          path: app_flutter/build/web
+
+  # -------------------- LINUX DESKTOP --------------------
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Flutter pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Linux (release)
+        working-directory: app_flutter
+        run: flutter build linux --release
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: barry_wifi_linux_build
+          path: app_flutter/build/linux/x64/release
+
+  # -------------------- WINDOWS DESKTOP --------------------
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Flutter pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Windows (release)
+        working-directory: app_flutter
+        run: flutter build windows --release
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: barry_wifi_windows_build
+          path: app_flutter/build/windows/x64/runner/Release

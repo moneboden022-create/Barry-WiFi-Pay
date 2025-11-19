@@ -1,27 +1,34 @@
+name: barry_wifi
+description: Application BARRY WI-FI
+publish_to: 'none'
 
-name: barry_paywifi
-description: App Flutter pour acheter et activer l'accès Wi‑Fi (BARRY Pay‑WiFi)
-publish_to: "none"
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  http: ^1.2.2
-  provider: ^6.1.2
-  url_launcher: ^6.3.1
-  # wifi_iot: ^0.3.19  # décommenter pour Android/iOS (provision Wi‑Fi)
+
+  cupertino_icons: ^1.0.6
+  http: ^1.1.0
+  mobile_scanner: ^3.2.0
+
+  # QR Code généré côté app
+  qr_flutter: ^4.1.0
+
+  # Stockage local (token, user_id, etc.)
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/logo.png
