@@ -1,0 +1,34 @@
+name: build-macos
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Enable macOS Desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: stable
+
+      - name: Flutter pub get
+        working-directory: .
+        run: flutter pub get
+
+      - name: Build macOS (release)
+        working-directory: .
+        run: flutter build macos --release
+
+      - name: Upload macOS App
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-release
+          path: build/macos/Build/Products/Release
