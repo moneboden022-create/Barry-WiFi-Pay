@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'voucher_screen.dart';
+import 'package:barry_wifi_pay/screens/voucher_screen.dart';
 
 class QRScannerScreen extends StatelessWidget {
   const QRScannerScreen({super.key});
