@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'package:barry_wifi_pay/screens/voucher_screen.dart';
+import 'voucher_screen.dart';
 
 class QRScannerScreen extends StatelessWidget {
   const QRScannerScreen({super.key});
@@ -23,7 +23,7 @@ class QRScannerScreen extends StatelessWidget {
               // On ferme l'écran du scanner
               Navigator.pop(context);
 
-              // On ouvre l'écran Voucher avec le code scanné
+              // On ouvre l’écran voucher avec le code scanné
               Navigator.push(
                 context,
                 MaterialPageRoute(

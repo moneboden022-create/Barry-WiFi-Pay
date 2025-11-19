@@ -19,8 +19,7 @@ class _VoucherScreenState extends State<VoucherScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Si un code a été scanné, on le pré-remplit
+    // Si un code a été scanné, on le met dans le champ
     if (widget.scannedCode != null) {
       codeController.text = widget.scannedCode!;
     }
@@ -32,31 +31,34 @@ class _VoucherScreenState extends State<VoucherScreen> {
       message = "";
     });
 
-    // 👉 À modifier plus tard par ton vrai backend
+    // 🔁 Remplace par l’URL de ton backend
     final url = Uri.parse("https://TON-SERVEUR/voucher/use");
 
     try {
       final response = await http.post(
         url,
-        headers: const {
+        headers: {
           "Content-Type": "application/json",
+          // 🔁 Plus tard : mettre le vrai token utilisateur
           "Authorization": "Bearer TON_TOKEN",
         },
         body: jsonEncode({"code": codeController.text}),
       );
 
-      if (!mounted) return;
-
       setState(() {
         loading = false;
-        if (response.statusCode == 200) {
-          message = "Voucher accepté ✔ Connexion activée";
-        } else {
-          message = "Erreur : ${response.body}";
-        }
       });
+
+      if (response.statusCode == 200) {
+        setState(() {
+          message = "Voucher accepté ✔ Connexion activée";
+        });
+      } else {
+        setState(() {
+          message = "Erreur : ${response.body}";
+        });
+      }
     } catch (e) {
-      if (!mounted) return;
       setState(() {
         loading = false;
         message = "Erreur réseau : $e";
@@ -73,7 +75,7 @@ class _VoucherScreenState extends State<VoucherScreen> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               "Entrer le code du voucher ou scanner un QR code",
@@ -81,7 +83,7 @@ class _VoucherScreenState extends State<VoucherScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Champ pour le code
+            // Champ de texte
             TextField(
               controller: codeController,
               decoration: const InputDecoration(
@@ -91,34 +93,38 @@ class _VoucherScreenState extends State<VoucherScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Bouton ACTIVER
+            // Bouton vérifier
             loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: useVoucher,
                     child: const Text("Activer le Wi-Fi"),
                   ),
             const SizedBox(height: 20),
 
-            // Bouton pour aller au scanner QR
+            // Bouton SCANNER
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.pushNamed(context, "/qrscan");
               },
               icon: const Icon(Icons.qr_code_scanner),
               label: const Text("Scanner QR Code"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+              ),
             ),
+
             const SizedBox(height: 20),
 
-            // Message de retour
-            if (message.isNotEmpty)
-              Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
+            // Message retour
+            Text(
+              message,
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
               ),
+            ),
           ],
         ),
       ),
