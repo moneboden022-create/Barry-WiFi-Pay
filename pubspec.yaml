@@ -14,21 +14,31 @@ dependencies:
   cupertino_icons: ^1.0.6
   http: ^1.1.0
   mobile_scanner: ^3.2.0
-
-  # QR Code généré côté app
   qr_flutter: ^4.1.0
 
-  # Stockage local (token, user_id, etc.)
   shared_preferences: ^2.2.2
+
+  # 🚀 Pour ouvrir WhatsApp + liens externes
+  url_launcher: ^6.1.7
+
+  # 🌍 Traductions
+  flutter_localizations:
+    sdk: flutter
+
+  # 📸 Choisir une image de profil
+  image_picker: ^1.0.7
+
+  # 📁 Sauvegarder l'image dans la mémoire interne
+  path_provider: ^2.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/logo.png

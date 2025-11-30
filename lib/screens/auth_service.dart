@@ -1,36 +1,69 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'auth_token.dart';
 
-class AuthService {
-  const String baseUrl = "http://127.0.0.1:8000";
+class AdminService {
+  static const String baseUrl = "http://127.0.0.1:8000/api/admin";
 
-  static Future<bool> login(String phone, String country, String password) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/login"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "phone": phone,
-        "country": country,
-        "password": password,
-      }),
-    );
+  static Map<String, String> _headers() {
+    final token = AuthToken.adminToken?.isNotEmpty == true
+        ? AuthToken.adminToken
+        : AuthToken.token;
 
-    return response.statusCode == 200;
+    return {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
+    };
   }
 
-  static Future<bool> register(
-      String phone, String country, String password, bool business) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/register"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "phone": phone,
-        "country": country,
-        "password": password,
-        "is_business": business,
-      }),
+  static dynamic _decode(http.Response res) {
+    try {
+      return json.decode(res.body);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ---------- STATS ----------
+  static Future<Map<String, dynamic>> getStats() async {
+    final res = await http.get(Uri.parse("$baseUrl/stats"), headers: _headers());
+
+    if (res.statusCode == 200) return _decode(res);
+
+    return {"error": res.statusCode};
+  }
+
+  // ---------- USERS ----------
+  static Future<Map<String, dynamic>> getUsers() async {
+    final res = await http.get(Uri.parse("$baseUrl/users"), headers: _headers());
+
+    if (res.statusCode == 200) return _decode(res);
+
+    return {"count": 0, "users": []};
+  }
+
+  // ---------- CONNECTIONS ----------
+  static Future<Map<String, dynamic>> getConnections() async {
+    final res = await http.get(Uri.parse("$baseUrl/connections"), headers: _headers());
+
+    if (res.statusCode == 200) return _decode(res);
+
+    return {"count": 0, "connections": []};
+  }
+
+  // ---------- VOUCHER ----------
+  static Future<String> generateVoucher() async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/voucher/create"),
+      headers: _headers(),
     );
 
-    return response.statusCode == 200;
+    if (res.statusCode == 200) {
+      final data = _decode(res);
+      return data["voucher"] ?? "OK";
+    } else {
+      return "Erreur ${res.statusCode}";
+    }
   }
 }
