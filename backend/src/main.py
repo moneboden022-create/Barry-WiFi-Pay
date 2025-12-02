@@ -29,6 +29,7 @@ from .routers.admin_auth import router as admin_auth_router
 from .routers.admin_stats import router as admin_stats_router
 from .routers.admin_vouchers import router as admin_vouchers_router
 from .routers.geolocation import router as geolocation_router
+from .routers.payments_mobile import router as payments_router  # TODO: Payment integration
 
 # Middleware de sécurité
 from .middleware.rate_limiter import rate_limiter
@@ -125,6 +126,11 @@ app.include_router(admin_auth_router, prefix="/api")      # /api/admin/auth
 app.include_router(admin_router, prefix="/api")           # /api/admin
 app.include_router(admin_stats_router, prefix="/api")     # /api/admin/stats
 app.include_router(admin_vouchers_router, prefix="/api")  # /api/admin/vouchers
+
+# ============================================================
+# ROUTES - PAIEMENTS (TODO: Payment integration)
+# ============================================================
+app.include_router(payments_router, prefix="/api")        # /api/payments
 
 # ============================================================
 # HOME
