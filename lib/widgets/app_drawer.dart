@@ -202,6 +202,29 @@ class _AppDrawerState extends State<AppDrawer>
                       route: "/profile",
                       index: 7),
 
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Divider(),
+                  ),
+
+                  _animatedTile(
+                      icon: Icons.info_outline,
+                      title: "À Propos",
+                      route: "/about",
+                      index: 8),
+
+                  _animatedTile(
+                      icon: Icons.gavel,
+                      title: "Conditions d'utilisation",
+                      route: "/terms",
+                      index: 9),
+
+                  _animatedTile(
+                      icon: Icons.privacy_tip_outlined,
+                      title: "Confidentialité",
+                      route: "/privacy",
+                      index: 10),
+
                   const SizedBox(height: 15),
 
                   Padding(

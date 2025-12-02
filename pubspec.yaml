@@ -31,6 +31,29 @@ dependencies:
   # 📁 Sauvegarder l'image dans la mémoire interne
   path_provider: ^2.1.2
 
+  # 📊 Graphiques et statistiques
+  fl_chart: ^0.66.0
+
+  # 🌍 Géolocalisation
+  geolocator: ^11.0.0
+  geocoding: ^2.1.1
+
+  # 🔐 Stockage sécurisé
+  flutter_secure_storage: ^9.0.0
+
+  # ⏱️ Timer et formatage de dates
+  intl: ^0.18.1
+
+  # 🎨 Animations modernes
+  flutter_animate: ^4.3.0
+  shimmer: ^3.0.0
+
+  # 📱 Info appareil
+  device_info_plus: ^9.1.1
+
+  # 🔔 Notifications locales
+  flutter_local_notifications: ^16.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

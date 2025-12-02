@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:barry_wifi_pay/services/admin_service.dart';
-import 'package:barry_wifi_pay/models/admin_models.dart';
-import 'package:barry_wifi_pay/widgets/stat_card.dart';
+import 'package:barry_wifi/services/admin_service.dart';
+import 'package:barry_wifi/models/admin_models.dart';
+import 'package:barry_wifi/widgets/stat_card.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});

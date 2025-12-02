@@ -105,7 +105,7 @@ def buy_subscription(
     )
 
     db.commit()
-    return {"message": "Forfait activé", "expires": end}
+    return {"message": "Forfait activé", "expires": end_at}
 
 
 # =====================================================================
