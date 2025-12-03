@@ -7,6 +7,7 @@ from typing import Optional
 from ..db import get_db
 from .. import models, schemas
 from ..security import get_current_user
+from ..deps import admin_required
 
 router = APIRouter(prefix="/plans", tags=["Plans"])
 
@@ -14,13 +15,7 @@ router = APIRouter(prefix="/plans", tags=["Plans"])
 # ------------------------------------------------------------
 # 🔒 Helper : Vérification rôle administrateur
 # ------------------------------------------------------------
-def admin_required(user: models.User):
-    if not getattr(user, "is_admin", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accès réservé aux administrateurs."
-        )
-    return True
+# Note: admin_required est maintenant importé depuis deps.py
 
 
 # ============================================================
@@ -32,7 +27,6 @@ def create_plan(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    admin_required(user)
 
     new_plan = models.Plan(
         name=plan.name,
@@ -116,7 +110,6 @@ def update_plan(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    admin_required(user)
 
     existing = db.query(models.Plan).filter(models.Plan.id == plan_id).first()
     if not existing:
@@ -142,7 +135,6 @@ def delete_plan(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    admin_required(user)
 
     plan = db.query(models.Plan).filter(models.Plan.id == plan_id).first()
     if not plan:

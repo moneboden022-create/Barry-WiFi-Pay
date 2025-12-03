@@ -37,6 +37,31 @@ def get_user_by_phone(db: Session, phone: str):
     return db.query(models.User).filter(models.User.phone_number == phone).first()
 
 
+def get_user_by_email(db: Session, email: str):
+    """Recherche un utilisateur par email."""
+    return db.query(models.User).filter(models.User.email == email).first()
+
+
+def get_user_by_identifier(db: Session, identifier: str):
+    """
+    🔥 Recherche un utilisateur par identifier (email OU téléphone).
+    - Si contient '@' → recherche par email
+    - Sinon → recherche par phone_number
+    """
+    if not identifier:
+        return None
+    
+    # Nettoyer l'identifiant
+    identifier = identifier.strip()
+    
+    # Si c'est un email (contient @)
+    if '@' in identifier:
+        return get_user_by_email(db, identifier)
+    
+    # Sinon, c'est un numéro de téléphone
+    return get_user_by_phone(db, identifier)
+
+
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 

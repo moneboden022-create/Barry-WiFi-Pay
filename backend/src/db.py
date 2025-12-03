@@ -2,9 +2,9 @@
 import os
 import logging
 from pathlib import Path
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, IntegrityError
 
 from dotenv import load_dotenv
 
@@ -54,13 +54,48 @@ Base = declarative_base()
 def test_database_connection():
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
         logger.info("✅ Connexion DB OK : %s", DATABASE_URL)
+        return True
     except OperationalError as e:
         logger.error("❌ Erreur connexion DB : %s", e)
+        return False
 
 # Appeler le test immédiatement
 test_database_connection()
+
+
+# =============================================================
+# CRÉATION SÉCURISÉE DES TABLES
+# =============================================================
+def create_tables_safely():
+    """
+    Crée les tables de manière sécurisée.
+    Gère les erreurs d'index déjà existants (SQLite).
+    """
+    try:
+        # Importer les modèles pour les enregistrer
+        from . import models
+        
+        # Créer les tables avec checkfirst=True
+        Base.metadata.create_all(bind=engine, checkfirst=True)
+        logger.info("✅ Tables créées/vérifiées avec succès")
+        return True
+    except OperationalError as e:
+        error_msg = str(e)
+        # Ignorer les erreurs d'index déjà existant
+        if "already exists" in error_msg or "index" in error_msg.lower():
+            logger.warning("⚠️ Index déjà existant (ignoré) : %s", error_msg[:100])
+            return True
+        logger.error("❌ Erreur création tables : %s", e)
+        return False
+    except IntegrityError as e:
+        logger.warning("⚠️ Erreur d'intégrité (ignorée) : %s", str(e)[:100])
+        return True
+    except Exception as e:
+        logger.error("❌ Erreur inattendue création tables : %s", e)
+        return False
+
 
 # =============================================================
 # DÉPENDANCE FASTAPI
@@ -74,3 +109,21 @@ def get_db():
         raise
     finally:
         db.close()
+
+
+# =============================================================
+# RESET DATABASE (pour dev/test uniquement)
+# =============================================================
+def reset_database():
+    """
+    Supprime et recrée toutes les tables.
+    ⚠️ ATTENTION : Perte de toutes les données !
+    """
+    try:
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Base de données réinitialisée")
+        return True
+    except Exception as e:
+        logger.error("❌ Erreur reset DB : %s", e)
+        return False

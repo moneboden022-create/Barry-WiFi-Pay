@@ -1,4 +1,5 @@
 // lib/services/notification_service.dart
+// 🔔 BARRY WI-FI - Service de Notifications 5G
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -29,7 +30,8 @@ class NotificationService {
         _plugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
 
-    await androidImplementation?.requestPermission();
+    // Note: requestNotificationsPermission est la méthode correcte
+    await androidImplementation?.requestNotificationsPermission();
   }
 
   // ------------------------------------------------------
@@ -53,5 +55,40 @@ class NotificationService {
       body,
       platformDetails,
     );
+  }
+
+  // ------------------------------------------------------
+  // 4️⃣ NOTIFICATION AVEC ACTION
+  // ------------------------------------------------------
+  static Future<void> showWithPayload(
+    String title,
+    String body,
+    String payload,
+  ) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'wifi_channel',
+      'BARRY WIFI Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
+
+    await _plugin.show(
+      DateTime.now().millisecond,
+      title,
+      body,
+      platformDetails,
+      payload: payload,
+    );
+  }
+
+  // ------------------------------------------------------
+  // 5️⃣ ANNULER TOUTES LES NOTIFICATIONS
+  // ------------------------------------------------------
+  static Future<void> cancelAll() async {
+    await _plugin.cancelAll();
   }
 }

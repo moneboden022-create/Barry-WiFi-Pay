@@ -1,12 +1,14 @@
 # backend/src/routers/subscriptions.py
 
 from datetime import datetime, timedelta
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Subscription, Plan, Voucher, WifiAccess
 from ..security import get_current_user
+from ..schemas import SubscriptionOut
 from ..utils import (
     get_active_subscription,
     get_or_create_device,
@@ -25,6 +27,43 @@ except:
 
 router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 wifi_manager = WifiNetworkManager()
+
+
+# =====================================================================
+# 📋 GET MY SUBSCRIPTIONS (Pour Flutter)
+# =====================================================================
+@router.get("/mine", response_model=List[SubscriptionOut])
+def get_my_subscriptions(
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    """
+    Récupère tous les abonnements de l'utilisateur connecté.
+    Utilisé par Flutter pour afficher l'historique des abonnements.
+    """
+    subscriptions = db.query(Subscription).filter(
+        Subscription.user_id == user.id
+    ).order_by(Subscription.created_at.desc()).all()
+    
+    return subscriptions
+
+
+# =====================================================================
+# 📋 GET ACTIVE SUBSCRIPTION
+# =====================================================================
+@router.get("/active", response_model=SubscriptionOut)
+def get_active_subscription_endpoint(
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    """
+    Récupère l'abonnement actif de l'utilisateur.
+    """
+    subscription = get_active_subscription(db, user.id)
+    if not subscription:
+        raise HTTPException(404, "Aucun abonnement actif.")
+    
+    return subscription
 
 
 # =====================================================================
@@ -105,7 +144,7 @@ def buy_subscription(
     )
 
     db.commit()
-    return {"message": "Forfait activé", "expires": end}
+    return {"message": "Forfait activé", "expires": end_at}
 
 
 # =====================================================================
@@ -133,7 +172,7 @@ def use_voucher(
             Subscription.is_active == True
         ).count()
         if active_count >= voucher.max_devices:
-            raise HTTPException(403, "Limite d’utilisation atteinte")
+            raise HTTPException(403, "Limite d'utilisation atteinte")
 
     start = datetime.utcnow()
     end = start + timedelta(minutes=voucher.duration_minutes)

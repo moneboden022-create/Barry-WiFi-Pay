@@ -9,6 +9,7 @@ import uuid
 
 from ..db import get_db
 from ..security import get_current_user
+from ..deps import admin_required as admin_required_dep
 from ..models import (
     User,
     Payment,
@@ -17,6 +18,7 @@ from ..models import (
     ConnectionHistory,
     Device,
     Voucher,
+    AdminSession,
 )
 from ..services.network.providers import WifiNetworkManager
 
@@ -29,11 +31,7 @@ _network = WifiNetworkManager()
 # --------------------------------------------------------
 # Helpers
 # --------------------------------------------------------
-def admin_required(user: User):
-    if not getattr(user, "is_admin", False):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Accès réservé aux administrateurs")
-    return True
+# Note: admin_required est maintenant importé depuis deps.py
 
 
 def serialize_user(u: User):
@@ -73,9 +71,8 @@ def serialize_payment(p: Payment):
 @router.get("/stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     now = datetime.utcnow()
     today_start = datetime(now.year, now.month, now.day)
@@ -149,9 +146,8 @@ def list_users(
 def get_user_detail(
     user_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     u = db.query(User).filter(User.id == user_id).first()
 
     if not u:
@@ -164,9 +160,8 @@ def get_user_detail(
 def set_admin_role(
     user_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     u = db.query(User).filter(User.id == user_id).first()
 
     if not u:
@@ -181,9 +176,8 @@ def set_admin_role(
 def remove_admin_role(
     user_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     u = db.query(User).filter(User.id == user_id).first()
 
     if not u:
@@ -198,9 +192,8 @@ def remove_admin_role(
 def delete_user_account(
     user_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     u = db.query(User).filter(User.id == user_id).first()
 
     if not u:
@@ -242,9 +235,8 @@ def list_devices(
 def block_device(
     device_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     d = db.query(Device).filter(Device.id == device_id).first()
 
     if not d:
@@ -259,9 +251,8 @@ def block_device(
 def unblock_device(
     device_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
     d = db.query(Device).filter(Device.id == device_id).first()
 
     if not d:
@@ -304,9 +295,8 @@ def list_wifi_access(
 def disable_wifi_admin(
     user_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     w = db.query(WifiAccess).filter(WifiAccess.user_id == user_id).first()
 
@@ -351,9 +341,8 @@ def list_subscriptions(
 @router.get("/subscriptions/active")
 def list_active_subs(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     now = datetime.utcnow()
     rows = db.query(Subscription).filter(
@@ -370,9 +359,8 @@ def list_active_subs(
 @router.get("/subscriptions/expired")
 def list_expired_subs(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     now = datetime.utcnow()
     rows = db.query(Subscription).filter(Subscription.end_at <= now).all()
@@ -415,9 +403,8 @@ def list_vouchers(
 @router.get("/vouchers/used")
 def list_used_vouchers(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     rows = db.query(Voucher).filter(Voucher.is_used == True).all()
 
@@ -433,30 +420,26 @@ def list_used_vouchers(
 
 # -----------------------------
 # ADMIN: Create Voucher
+# 🔥 DÉSACTIVÉ - Utiliser /api/admin/vouchers/create (admin_vouchers.py)
 # -----------------------------
-@router.post("/vouchers/create")
-def admin_create_voucher(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
-):
-    admin_required(user)
-
-    # Générer un code propre
-    code = str(uuid.uuid4())[:8].upper()
-
-    voucher = Voucher(
-        code=code,
-        type="admin",
-        duration_minutes=60,
-        max_devices=1,
-        created_at=datetime.utcnow()
-    )
-
-    db.add(voucher)
-    db.commit()
-    db.refresh(voucher)
-
-    return {"voucher": code}
+# @router.post("/vouchers/create")
+# def admin_create_voucher(
+#     db: Session = Depends(get_db),
+#     user: User = Depends(get_current_user)
+# ):
+#     admin_required(user)
+#     code = str(uuid.uuid4())[:8].upper()
+#     voucher = Voucher(
+#         code=code,
+#         type="admin",
+#         duration_minutes=60,
+#         max_devices=1,
+#         created_at=datetime.utcnow()
+#     )
+#     db.add(voucher)
+#     db.commit()
+#     db.refresh(voucher)
+#     return {"voucher": code}
 
 
 # --------------------------------------------------------
@@ -465,9 +448,8 @@ def admin_create_voucher(
 @router.get("/payments/all")
 def list_payments(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     rows = db.query(Payment).order_by(Payment.id.desc()).all()
 
@@ -510,9 +492,105 @@ def list_connections(
 @router.get("/system/router-status")
 def router_status(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(admin_required_dep)
 ):
-    admin_required(user)
 
     ok, msg = _network.get_status(user_id=0)
     return {"ok": ok, "message": msg}
+
+
+# ============================================================
+# 🔐 ADMIN SESSIONS
+# ============================================================
+@router.get("/sessions")
+def get_all_admin_sessions(
+    db: Session = Depends(get_db),
+    user: User = Depends(admin_required_dep)
+):
+    """
+    Retourne toutes les sessions admin actives (tous les admins).
+    """
+    sessions = db.query(AdminSession).filter(
+        AdminSession.active == True,
+        AdminSession.expires_at > datetime.utcnow()
+    ).order_by(AdminSession.created_at.desc()).all()
+    
+    # Récupérer les infos des admins
+    admin_ids = list(set([s.admin_id for s in sessions]))
+    admins = {u.id: u for u in db.query(User).filter(User.id.in_(admin_ids)).all()}
+    
+    return {
+        "count": len(sessions),
+        "sessions": [
+            {
+                "id": s.id,
+                "admin_id": s.admin_id,
+                "admin_name": f"{admins[s.admin_id].first_name} {admins[s.admin_id].last_name}".strip() if s.admin_id in admins else "Inconnu",
+                "admin_phone": admins[s.admin_id].phone_number if s.admin_id in admins else None,
+                "device_id": s.device_id,
+                "ip": s.ip,
+                "user_agent": s.user_agent,
+                "created_at": s.created_at.isoformat(),
+                "expires_at": s.expires_at.isoformat(),
+            }
+            for s in sessions
+        ]
+    }
+
+
+@router.get("/sessions/my")
+def get_my_admin_sessions(
+    db: Session = Depends(get_db),
+    user: User = Depends(admin_required_dep)
+):
+    """
+    Retourne toutes les sessions admin de l'administrateur connecté.
+    """
+    sessions = db.query(AdminSession).filter(
+        AdminSession.admin_id == user.id,
+        AdminSession.active == True,
+        AdminSession.expires_at > datetime.utcnow()
+    ).order_by(AdminSession.created_at.desc()).all()
+    
+    return {
+        "count": len(sessions),
+        "sessions": [
+            {
+                "id": s.id,
+                "device_id": s.device_id,
+                "ip": s.ip,
+                "user_agent": s.user_agent,
+                "created_at": s.created_at.isoformat(),
+                "expires_at": s.expires_at.isoformat(),
+                "is_current": False  # Sera déterminé côté client
+            }
+            for s in sessions
+        ]
+    }
+
+
+@router.delete("/sessions/{session_id}")
+def delete_admin_session(
+    session_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(admin_required_dep)
+):
+    """
+    Supprime une session admin (déconnexion à distance).
+    Un admin peut supprimer n'importe quelle session admin.
+    """
+    session = db.query(AdminSession).filter(
+        AdminSession.id == session_id
+    ).first()
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session introuvable."
+        )
+    
+    # Marquer la session comme inactive au lieu de la supprimer
+    session.active = False
+    db.commit()
+    
+    return {"ok": True, "message": "Session supprimée avec succès"}
