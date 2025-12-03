@@ -35,6 +35,19 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor -v
 
+      # IMPORTANT : nettoyer le cache des plugins Flutter
+      - name: Clean flutter plugin cache
+        run: |
+          flutter pub cache repair
+          rm -rf $HOME/.pub-cache/hosted/pub.dev/geolocator_android*
+          flutter pub get
+
+      # Patch automatique pour le plugin geolocator_android
+      - name: Force compileSdkVersion for geolocator_android
+        run: |
+          find $HOME/.pub-cache -path "*geolocator_android*/android/build.gradle" -exec sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/g' {} \; || true
+          find $HOME/.pub-cache -path "*geolocator_android*/android/build.gradle" -exec sed -i 's/compileSdk flutter.compileSdkVersion/compileSdkVersion 35/g' {} \; || true
+
       - name: Flutter pub get
         run: flutter pub get
 
