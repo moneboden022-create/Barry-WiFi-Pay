@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace "com.example.barry_wifi_pay"
-    compileSdk 34
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.example.barry_wifi_pay"
-        minSdk 21
-        targetSdk 34
+        minSdkVersion 21
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
