@@ -1,0 +1,16 @@
+# ⚠️ TEMPLATE - Ne pas commiter ce fichier avec vos vraies clés !
+# Copiez ce fichier vers key.properties et remplissez avec vos vraies valeurs
+# OU utilisez GitHub Secrets (recommandé)
+
+# Chemin vers le keystore (relatif à android/app/)
+storeFile=upload-keystore.jks
+
+# Alias de la clé
+keyAlias=upload
+
+# Mot de passe du keystore
+storePassword=your_store_password_here
+
+# Mot de passe de la clé
+keyPassword=your_key_password_here
+

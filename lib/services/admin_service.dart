@@ -2,13 +2,44 @@
 // Service Admin complet pour BARRY WiFi - Version 5G
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_token.dart';
+import '../models/admin_models.dart';
 
 class AdminService {
   static const String baseUrl = "http://127.0.0.1:8000/api/admin";
   static const String statsUrl = "http://127.0.0.1:8000/api/admin/stats";
   static const String vouchersUrl = "http://127.0.0.1:8000/api/admin/vouchers";
 
+  /// 🔥 Récupère les headers avec le token admin de manière fiable (async)
+  static Future<Map<String, String>> _getHeaders() async {
+    String? token;
+    
+    // 🔥 1. Priorité au token admin en mémoire
+    if (AuthToken.adminToken != null && AuthToken.adminToken!.isNotEmpty) {
+      token = AuthToken.adminToken;
+    }
+    // 🔥 2. Sinon token normal en mémoire
+    else if (AuthToken.token != null && AuthToken.token!.isNotEmpty) {
+      token = AuthToken.token;
+    }
+    // 🔥 3. Sinon essayer de récupérer depuis SharedPreferences
+    else {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('admin_token') ?? prefs.getString('auth_token');
+      if (token != null && token.isNotEmpty) {
+        AuthToken.adminToken = token;
+      }
+    }
+    
+    return {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
+    };
+  }
+
+  /// 🔄 Headers synchrones (pour compatibilité) - utilise le token en mémoire
   static Map<String, String> _headers() {
     final token = AuthToken.adminToken?.isNotEmpty == true
         ? AuthToken.adminToken
@@ -35,7 +66,8 @@ class AdminService {
   static Future<Map<String, dynamic>> getStats() async {
     final url = Uri.parse("$baseUrl/stats");
     try {
-      final res = await http.get(url, headers: _headers());
+      final headers = await _getHeaders();
+      final res = await http.get(url, headers: headers);
       if (res.statusCode == 200) {
         final body = _safeDecodeBody(res);
         if (body is Map<String, dynamic>) return body;
@@ -49,7 +81,8 @@ class AdminService {
   static Future<Map<String, dynamic>> getOverviewStats() async {
     final url = Uri.parse("$statsUrl/overview");
     try {
-      final res = await http.get(url, headers: _headers());
+      final headers = await _getHeaders();
+      final res = await http.get(url, headers: headers);
       if (res.statusCode == 200) {
         return _safeDecodeBody(res) ?? {};
       }
@@ -277,7 +310,8 @@ class AdminService {
     
     final url = Uri.parse(vouchersUrl).replace(queryParameters: params);
     try {
-      final res = await http.get(url, headers: _headers());
+      final headers = await _getHeaders();
+      final res = await http.get(url, headers: headers);
       if (res.statusCode == 200) {
         final body = _safeDecodeBody(res);
         return {
@@ -285,6 +319,10 @@ class AdminService {
           "count": body?['count'] ?? 0,
           "vouchers": body?['vouchers'] ?? []
         };
+      }
+      // 🔥 Gestion erreur 401/403
+      if (res.statusCode == 401 || res.statusCode == 403) {
+        return {"total": 0, "count": 0, "vouchers": [], "error": "Non authentifié"};
       }
       return {"total": 0, "count": 0, "vouchers": []};
     } catch (e) {
@@ -301,9 +339,16 @@ class AdminService {
   }) async {
     final url = Uri.parse("$vouchersUrl/create");
     try {
+      final headers = await _getHeaders();
+      
+      // 🔥 Vérifier si le token est présent
+      if (!headers.containsKey('Authorization')) {
+        return {"ok": false, "error": "Non authentifié. Veuillez vous reconnecter."};
+      }
+      
       final res = await http.post(
         url,
-        headers: _headers(),
+        headers: headers,
         body: json.encode({
           "type": type,
           "duration_minutes": durationMinutes,
@@ -315,6 +360,14 @@ class AdminService {
       final body = _safeDecodeBody(res);
       if (res.statusCode == 200) {
         return {"ok": true, "data": body};
+      }
+      // 🔥 Gestion erreur 401 - Non authentifié
+      if (res.statusCode == 401) {
+        return {"ok": false, "error": "Session expirée. Veuillez vous reconnecter."};
+      }
+      // 🔥 Gestion erreur 403 - Non autorisé
+      if (res.statusCode == 403) {
+        return {"ok": false, "error": "Accès refusé. Droits administrateur requis."};
       }
       return {"ok": false, "error": body?["detail"] ?? "Erreur"};
     } catch (e) {
@@ -421,6 +474,128 @@ class AdminService {
       return {"ok": false, "error": "HTTP ${res.statusCode}"};
     } catch (e) {
       return {"ok": false, "error": e.toString()};
+    }
+  }
+
+  // ============================================================
+  // 📊 SESSIONS ACTIVES
+  // ============================================================
+  
+  static Future<List<Session>> getSessions() async {
+    final url = Uri.parse("$baseUrl/sessions");
+    try {
+      final res = await http.get(url, headers: _headers());
+      if (res.statusCode == 200) {
+        final body = _safeDecodeBody(res);
+        final list = body is List ? body : body?["sessions"] ?? [];
+        return (list as List).map((e) => Session.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ============================================================
+  // 📜 HISTORIQUE GÉNÉRAL
+  // ============================================================
+  
+  static Future<List<Map<String, dynamic>>> getHistory({int limit = 100, int offset = 0}) async {
+    final url = Uri.parse("$baseUrl/history").replace(
+      queryParameters: {'limit': '$limit', 'offset': '$offset'}
+    );
+    try {
+      final res = await http.get(url, headers: _headers());
+      if (res.statusCode == 200) {
+        final body = _safeDecodeBody(res);
+        final list = body is List ? body : body?["history"] ?? [];
+        return List<Map<String, dynamic>>.from(list);
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ============================================================
+  // 🔐 ADMIN SESSIONS
+  // ============================================================
+  
+  /// Récupère toutes les sessions admin (tous les admins)
+  static Future<Map<String, dynamic>> getAllAdminSessions() async {
+    final url = Uri.parse("$baseUrl/sessions");
+    try {
+      final headers = await _getHeaders();
+      final res = await http.get(url, headers: headers);
+      if (res.statusCode == 200) {
+        final body = _safeDecodeBody(res);
+        return {
+          "success": true,
+          "sessions": body?["sessions"] ?? [],
+          "count": body?["count"] ?? 0,
+        };
+      }
+      return {
+        "success": false,
+        "message": "Erreur HTTP ${res.statusCode}",
+      };
+    } catch (e) {
+      return {
+        "success": false,
+        "message": e.toString(),
+      };
+    }
+  }
+  
+  /// Récupère toutes les sessions admin de l'administrateur connecté
+  static Future<Map<String, dynamic>> getMyAdminSessions() async {
+    final url = Uri.parse("$baseUrl/sessions/my");
+    try {
+      final headers = await _getHeaders();
+      final res = await http.get(url, headers: headers);
+      if (res.statusCode == 200) {
+        final body = _safeDecodeBody(res);
+        return {
+          "success": true,
+          "sessions": body?["sessions"] ?? [],
+          "count": body?["count"] ?? 0,
+        };
+      }
+      return {
+        "success": false,
+        "message": "Erreur HTTP ${res.statusCode}",
+      };
+    } catch (e) {
+      return {
+        "success": false,
+        "message": e.toString(),
+      };
+    }
+  }
+
+  /// Supprime une session admin (déconnexion à distance)
+  static Future<Map<String, dynamic>> deleteAdminSession(int sessionId) async {
+    final url = Uri.parse("$baseUrl/sessions/$sessionId");
+    try {
+      final headers = await _getHeaders();
+      final res = await http.delete(url, headers: headers);
+      if (res.statusCode == 200) {
+        final body = _safeDecodeBody(res);
+        return {
+          "success": true,
+          "message": body?["message"] ?? "Session supprimée avec succès",
+        };
+      }
+      final body = _safeDecodeBody(res);
+      return {
+        "success": false,
+        "message": body?["detail"] ?? "Erreur HTTP ${res.statusCode}",
+      };
+    } catch (e) {
+      return {
+        "success": false,
+        "message": e.toString(),
+      };
     }
   }
 }

@@ -1,12 +1,10 @@
 // lib/services/export_service.dart
+// 📤 BARRY WI-FI - Service d'Export 5G
+// Note: Les exports PDF/Excel nécessitent des packages supplémentaires
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:excel/excel.dart';               // XLSX
-import 'package:pdf/pdf.dart';                   // PDF
-import 'package:pdf/widgets.dart' as pw;         // PDF
 import '../models/connection_model.dart';
 
 class ExportService {
@@ -19,7 +17,7 @@ class ExportService {
     final fileName = "connections_page${page}_$stamp.csv";
 
     final buffer = StringBuffer();
-    buffer.writeln("id,user_id,device_id,ip,voucher,user_agent,start_at,end_at,success,note");
+    buffer.writeln("id,user_id,device_id,ip,voucher,start_at,end_at,success");
 
     for (var c in list) {
       buffer.writeln([
@@ -28,11 +26,9 @@ class ExportService {
         c.deviceId,
         '"${c.ip}"',
         '"${c.voucherCode ?? ""}"',
-        '"${c.userAgent.replaceAll('"', "'")}"',
-        '"${c.startAt}"',
-        '"${c.endAt ?? ""}"',
+        '"${c.startAt.toIso8601String()}"',
+        '"${c.endAt?.toIso8601String() ?? ""}"',
         c.success ? "1" : "0",
-        '"${c.note ?? ""}"'
       ].join(","));
     }
 
@@ -40,122 +36,94 @@ class ExportService {
     final file = File("${dir.path}/$fileName");
     await file.writeAsString(buffer.toString());
 
-    await Share.shareXFiles([XFile(file.path)], text: "Export CSV");
     return file.path;
   }
 
   /// ------------------------------------------------------------------------
-  /// 🟢 2) EXPORT XLSX (EXCEL)
+  /// 🟢 2) EXPORT JSON
   /// ------------------------------------------------------------------------
-  static Future<String> exportXLSX(List<ConnectionModel> list, int page) async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Connexions'];
-
-    // header
-    sheet.appendRow([
-      "ID",
-      "User ID",
-      "Device ID",
-      "IP",
-      "Voucher",
-      "User Agent",
-      "Début",
-      "Fin",
-      "Succès",
-      "Note"
-    ]);
-
-    // rows
-    for (var c in list) {
-      sheet.appendRow([
-        c.id,
-        c.userId,
-        c.deviceId,
-        c.ip,
-        c.voucherCode ?? "",
-        c.userAgent,
-        c.startAt,
-        c.endAt ?? "",
-        c.success ? "Oui" : "Non",
-        c.note ?? "",
-      ]);
-    }
-
+  static Future<String> exportJSON(List<ConnectionModel> list, int page) async {
     final now = DateTime.now();
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(now);
-    final fileName = "connections_page${page}_$stamp.xlsx";
+    final fileName = "connections_page${page}_$stamp.json";
+
+    final jsonList = list.map((c) => c.toJson()).toList();
+    final jsonString = '{"connections": $jsonList, "page": $page, "exported_at": "$now"}';
 
     final dir = await getApplicationDocumentsDirectory();
     final file = File("${dir.path}/$fileName");
-    await file.writeAsBytes(excel.encode()!);
+    await file.writeAsString(jsonString);
 
-    await Share.shareXFiles([XFile(file.path)], text: "Export Excel (XLSX)");
     return file.path;
   }
 
   /// ------------------------------------------------------------------------
-  /// 🔴 3) EXPORT PDF (TABLE PRO)
+  /// 📊 3) EXPORT TXT (Simple)
   /// ------------------------------------------------------------------------
-  static Future<String> exportPDF(List<ConnectionModel> list, int page) async {
-    final pdf = pw.Document();
+  static Future<String> exportTXT(List<ConnectionModel> list, int page) async {
     final now = DateTime.now();
-    final stamp = DateFormat('dd/MM/yyyy HH:mm').format(now);
+    final stamp = DateFormat('yyyyMMdd_HHmmss').format(now);
+    final fileName = "connections_page${page}_$stamp.txt";
 
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(22),
-        build: (context) {
-          return [
-            pw.Text(
-              "BARRY WIFI — Export Connexions",
-              style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 8),
-            pw.Text("Page: $page"),
-            pw.Text("Généré le : $stamp"),
-            pw.SizedBox(height: 12),
+    final buffer = StringBuffer();
+    buffer.writeln("=== BARRY WI-FI - Export Connexions ===");
+    buffer.writeln("Page: $page");
+    buffer.writeln("Date: ${DateFormat('dd/MM/yyyy HH:mm').format(now)}");
+    buffer.writeln("Total: ${list.length} connexions");
+    buffer.writeln("");
+    buffer.writeln("=" * 50);
 
-            pw.Table.fromTextArray(
-              cellAlignment: pw.Alignment.centerLeft,
-              headerStyle: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 10,
-              ),
-              headers: [
-                "ID",
-                "IP",
-                "User",
-                "Device",
-                "Voucher",
-                "Début",
-                "Fin",
-                "OK",
-              ],
-              data: list.map((c) {
-                return [
-                  c.id,
-                  c.ip,
-                  c.userId,
-                  c.deviceId,
-                  c.voucherCode ?? "",
-                  c.startAt,
-                  c.endAt ?? "",
-                  c.success ? "✔" : "✘",
-                ];
-              }).toList(),
-            ),
-          ];
-        },
-      ),
-    );
+    for (var c in list) {
+      buffer.writeln("\nID: ${c.id}");
+      buffer.writeln("IP: ${c.ip}");
+      buffer.writeln("User ID: ${c.userId}");
+      buffer.writeln("Device: ${c.deviceId}");
+      buffer.writeln("Voucher: ${c.voucherCode ?? 'N/A'}");
+      buffer.writeln("Début: ${c.startAt}");
+      buffer.writeln("Fin: ${c.endAt ?? 'En cours'}");
+      buffer.writeln("Succès: ${c.success ? 'Oui' : 'Non'}");
+      buffer.writeln("-" * 30);
+    }
 
     final dir = await getApplicationDocumentsDirectory();
-    final path = "${dir.path}/connections_page${page}.pdf";
-    final file = File(path);
+    final file = File("${dir.path}/$fileName");
+    await file.writeAsString(buffer.toString());
 
-    await file.writeAsBytes(await pdf.save());
-    await Share.shareXFiles([XFile(file.path)], text: "Export PDF");
-    return path;
+    return file.path;
+  }
+
+  /// ------------------------------------------------------------------------
+  /// 📁 Obtenir le répertoire d'export
+  /// ------------------------------------------------------------------------
+  static Future<String> getExportDirectory() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final exportDir = Directory("${dir.path}/exports");
+    if (!await exportDir.exists()) {
+      await exportDir.create(recursive: true);
+    }
+    return exportDir.path;
+  }
+
+  /// ------------------------------------------------------------------------
+  /// 🗑️ Nettoyer les anciens exports
+  /// ------------------------------------------------------------------------
+  static Future<void> cleanOldExports({int maxAgeInDays = 30}) async {
+    try {
+      final exportPath = await getExportDirectory();
+      final exportDir = Directory(exportPath);
+      final now = DateTime.now();
+
+      await for (var entity in exportDir.list()) {
+        if (entity is File) {
+          final stat = await entity.stat();
+          final age = now.difference(stat.modified).inDays;
+          if (age > maxAgeInDays) {
+            await entity.delete();
+          }
+        }
+      }
+    } catch (_) {
+      // Ignorer les erreurs
+    }
   }
 }

@@ -2,7 +2,6 @@
 // Écran de connexion Admin sécurisé - BARRY WiFi 5G
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/admin_auth_service.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -15,7 +14,7 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  final _identifierController = TextEditingController();  // 🔥 Email OU Téléphone
   final _passwordController = TextEditingController();
   final _adminCodeController = TextEditingController();
 
@@ -49,7 +48,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
   @override
   void dispose() {
     _animController.dispose();
-    _phoneController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     _adminCodeController.dispose();
     super.dispose();
@@ -64,7 +63,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
     });
 
     final result = await AdminAuthService.login(
-      phone: _phoneController.text.trim(),
+      identifier: _identifierController.text.trim(),  // 🔥 Email OU Téléphone
       password: _passwordController.text,
       adminCode: _adminCodeController.text.trim(),
     );
@@ -227,14 +226,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
         ),
         child: Column(
           children: [
-            // Téléphone
+            // 🔥 Identifiant (Email OU Téléphone)
             _buildTextField(
-              controller: _phoneController,
-              label: "Numéro de téléphone",
-              icon: Icons.phone,
-              keyboardType: TextInputType.phone,
+              controller: _identifierController,
+              label: "Téléphone ou Email",
+              icon: Icons.person,
+              keyboardType: TextInputType.text,
               validator: (v) =>
-                  v == null || v.isEmpty ? "Numéro requis" : null,
+                  v == null || v.isEmpty ? "Identifiant requis" : null,
             ),
             const SizedBox(height: 16),
 

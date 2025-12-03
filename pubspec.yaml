@@ -1,8 +1,8 @@
 name: barry_wifi
-description: Application BARRY WI-FI
+description: Application BARRY WI-FI - Premium 5G
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 2.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -11,47 +11,47 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # 🎨 UI & Design
   cupertino_icons: ^1.0.6
+  
+  # 🌐 HTTP & API
   http: ^1.1.0
+  
+  # 📱 QR Code
   mobile_scanner: ^3.2.0
   qr_flutter: ^4.1.0
 
+  # 💾 Storage
   shared_preferences: ^2.2.2
-
-  # 🚀 Pour ouvrir WhatsApp + liens externes
-  url_launcher: ^6.1.7
-
-  # 🌍 Traductions
-  flutter_localizations:
-    sdk: flutter
-
-  # 📸 Choisir une image de profil
-  image_picker: ^1.0.7
-
-  # 📁 Sauvegarder l'image dans la mémoire interne
+  flutter_secure_storage: ^9.0.0
   path_provider: ^2.1.2
 
-  # 📊 Graphiques et statistiques
+  # 🚀 URL & Links
+  url_launcher: ^6.1.7
+
+  # 🌍 Localisation
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
+
+  # 📸 Image
+  image_picker: ^1.0.7
+
+  # 📊 Charts & Graphs
   fl_chart: ^0.66.0
 
   # 🌍 Géolocalisation
   geolocator: ^11.0.0
   geocoding: ^2.1.1
 
-  # 🔐 Stockage sécurisé
-  flutter_secure_storage: ^9.0.0
-
-  # ⏱️ Timer et formatage de dates
-  intl: ^0.18.1
-
-  # 🎨 Animations modernes
+  # 🎨 Animations Premium
   flutter_animate: ^4.3.0
   shimmer: ^3.0.0
 
-  # 📱 Info appareil
+  # 📱 Device Info
   device_info_plus: ^9.1.1
 
-  # 🔔 Notifications locales
+  # 🔔 Notifications
   flutter_local_notifications: ^16.3.0
 
 dev_dependencies:
@@ -63,5 +63,21 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # 📁 Assets
   assets:
+    - assets/
     - assets/logo.png
+
+  # 🔤 Fonts Premium (optionnel - utilise les fonts système si non disponibles)
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Poppins-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/Poppins-ExtraBold.ttf
+  #         weight: 800

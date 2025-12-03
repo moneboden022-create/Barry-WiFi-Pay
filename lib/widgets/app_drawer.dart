@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/auth_service.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -17,11 +18,13 @@ class _AppDrawerState extends State<AppDrawer>
   late Animation<double> _fade;
 
   String? _localImagePath;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _loadAvatar();
+    _checkAdminStatus();
 
     _ctrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 350));
@@ -33,6 +36,13 @@ class _AppDrawerState extends State<AppDrawer>
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _localImagePath = prefs.getString("avatar_path");
+    });
+  }
+
+  Future<void> _checkAdminStatus() async {
+    final isAdmin = await AuthService.isAdmin();
+    setState(() {
+      _isAdmin = isAdmin;
     });
   }
 
@@ -179,11 +189,47 @@ class _AppDrawerState extends State<AppDrawer>
                       title: "Voucher",
                       route: "/voucher",
                       index: 4),
-                  _animatedTile(
-                      icon: Icons.dashboard_outlined,
-                      title: "Admin Dashboard",
-                      route: "/admin",
-                      index: 5),
+                  
+                  // 🔷 SECTION ADMIN (uniquement si admin)
+                  if (_isAdmin) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Divider(),
+                    ),
+                    
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16, top: 4, bottom: 4),
+                      child: Text(
+                        "🔐 ADMINISTRATION",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    
+                    _animatedTile(
+                        icon: Icons.dashboard_outlined,
+                        title: "Admin Dashboard",
+                        route: "/admin",
+                        index: 5),
+                    _animatedTile(
+                        icon: Icons.confirmation_number_outlined,
+                        title: "📄 Gestion des Vouchers",
+                        route: "/admin/vouchers",
+                        index: 6),
+                    _animatedTile(
+                        icon: Icons.rocket_launch_outlined,
+                        title: "⚙️ Génération Massive",
+                        route: "/admin/voucher-generator",
+                        index: 7),
+                    _animatedTile(
+                        icon: Icons.devices,
+                        title: "Mes Sessions",
+                        route: "/admin/sessions",
+                        index: 8),
+                  ],
 
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -194,13 +240,13 @@ class _AppDrawerState extends State<AppDrawer>
                       icon: Icons.settings_outlined,
                       title: "Paramètres",
                       route: "/settings",
-                      index: 6),
+                      index: _isAdmin ? 9 : 5),
 
                   _animatedTile(
                       icon: Icons.person,
                       title: "Mon Profil",
                       route: "/profile",
-                      index: 7),
+                      index: _isAdmin ? 10 : 6),
 
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -211,19 +257,19 @@ class _AppDrawerState extends State<AppDrawer>
                       icon: Icons.info_outline,
                       title: "À Propos",
                       route: "/about",
-                      index: 8),
+                      index: _isAdmin ? 11 : 7),
 
                   _animatedTile(
                       icon: Icons.gavel,
                       title: "Conditions d'utilisation",
                       route: "/terms",
-                      index: 9),
+                      index: _isAdmin ? 12 : 8),
 
                   _animatedTile(
                       icon: Icons.privacy_tip_outlined,
                       title: "Confidentialité",
                       route: "/privacy",
-                      index: 10),
+                      index: _isAdmin ? 13 : 9),
 
                   const SizedBox(height: 15),
 
