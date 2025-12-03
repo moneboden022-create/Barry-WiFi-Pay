@@ -6,7 +6,97 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  # ---------------------------------------------------
+  # ANDROID
+  # ---------------------------------------------------
   build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk
+          path: flutter/build/app/outputs/flutter-apk/app-release.apk
+
+  # ---------------------------------------------------
+  # WINDOWS
+  # ---------------------------------------------------
+  build-windows:
+    name: Build Windows App
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows-release
+          path: flutter/build/windows/runner/Release/
+
+  # ---------------------------------------------------
+  # LINUX
+  # ---------------------------------------------------
+  build-linux:
+    name: Build Linux App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - run: flutter pub get
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: linux-release
+          path: flutter/build/linux/x64/release/bundle/
+
+  # ---------------------------------------------------
+  # WEB
+  # ---------------------------------------------------
+  build-web:
+    name: Build Web App
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,26 +109,63 @@ jobs:
           channel: stable
 
       - run: flutter pub get
-      - run: flutter build apk --release
+
+      - name: Build Web release
+        run: flutter build web --release
 
       - uses: actions/upload-artifact@v3
         with:
-          name: android-apk
-          path: flutter/build/app/outputs/flutter-apk/app-release.apk
+          name: web-release
+          path: flutter/build/web/
 
-  build-windows:
-    runs-on: windows-latest
+  # ---------------------------------------------------
+  # MACOS
+  # ---------------------------------------------------
+  build-macos:
+    name: Build macOS App
+    runs-on: macos-latest
     defaults:
       run:
         working-directory: flutter
     steps:
       - uses: actions/checkout@v3
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+
       - run: flutter pub get
-      - run: flutter build windows --release
+
+      - name: Build macOS app
+        run: flutter build macos --release
+
       - uses: actions/upload-artifact@v3
         with:
-          name: windows-build
-          path: flutter/build/windows/runner/Release/
+          name: macos-release
+          path: flutter/build/macos/Build/Products/Release/
+
+  # ---------------------------------------------------
+  # IOS
+  # ---------------------------------------------------
+  build-ios:
+    name: Build iOS App (IPA)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Build iOS (no signing)
+        run: flutter build ios --release --no-codesign
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ios-release
+          path: flutter/build/ios/iphoneos/
