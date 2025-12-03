@@ -9,27 +9,16 @@ android {
     compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     defaultConfig {
         applicationId "com.barrywifi.pay"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode flutter.versionCode
-        versionName flutter.versionName
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            shrinkResources false
             signingConfig signingConfigs.debug
         }
     }
@@ -37,8 +26,4 @@ android {
 
 flutter {
     source "../.."
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
 }
