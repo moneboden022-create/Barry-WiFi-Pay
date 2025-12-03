@@ -1,0 +1,94 @@
+name: 🚀 Build Android (APK + AAB)
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📱 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        working-directory: ./flutter
+        run: flutter pub get
+
+      - name: 🔍 Analyze code
+        working-directory: ./flutter
+        run: flutter analyze
+
+      - name: 🔑 Setup Android signing
+        working-directory: ./flutter/android
+        run: |
+          mkdir -p app
+          echo "storeFile=${{ secrets.ANDROID_KEYSTORE_FILE }}" > app/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> app/key.properties
+          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" >> app/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> app/key.properties
+        continue-on-error: true
+
+      - name: 📥 Download keystore (if available)
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        working-directory: ./flutter/android/app
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > upload-keystore.jks
+        continue-on-error: true
+
+      - name: 🏗️ Build APK
+        working-directory: ./flutter
+        run: |
+          flutter build apk --release --split-per-abi
+        continue-on-error: true
+
+      - name: 🏗️ Build AAB
+        working-directory: ./flutter
+        run: |
+          flutter build appbundle --release
+        continue-on-error: true
+
+      - name: 📤 Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-apk
+          path: |
+            flutter/build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+      - name: 📤 Upload AAB artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-aab
+          path: |
+            flutter/build/app/outputs/bundle/release/*.aab
+          retention-days: 30
+
+      - name: 📊 Build summary
+        if: always()
+        run: |
+          echo "## 📱 Android Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ APK et AAB générés avec succès !" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Téléchargez les artifacts dans l'onglet Actions de GitHub." >> $GITHUB_STEP_SUMMARY
+

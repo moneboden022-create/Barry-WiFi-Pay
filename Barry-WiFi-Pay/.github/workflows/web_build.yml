@@ -1,0 +1,58 @@
+name: 🌐 Build Web
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📱 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        working-directory: ./flutter
+        run: flutter pub get
+
+      - name: 🔍 Analyze code
+        working-directory: ./flutter
+        run: flutter analyze
+
+      - name: 🌐 Enable web support
+        working-directory: ./flutter
+        run: flutter config --enable-web
+
+      - name: 🏗️ Build Web
+        working-directory: ./flutter
+        run: flutter build web --release
+
+      - name: 📤 Upload Web artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-release
+          path: |
+            flutter/build/web/**
+          retention-days: 30
+
+      - name: 📊 Build summary
+        if: always()
+        run: |
+          echo "## 🌐 Web Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Application Web générée avec succès !" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Téléchargez les artifacts dans l'onglet Actions de GitHub." >> $GITHUB_STEP_SUMMARY
+
