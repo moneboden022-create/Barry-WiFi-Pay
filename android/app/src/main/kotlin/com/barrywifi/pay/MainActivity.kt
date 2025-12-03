@@ -1,5 +1,7 @@
-package com.barrywifi.pay
+﻿package com.barrywifi.pay
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity()
+class MainActivity: FlutterActivity() {
+}
+
