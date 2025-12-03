@@ -36,21 +36,17 @@ jobs:
         working-directory: ./flutter
         run: flutter analyze
 
-      - name: 🔑 Setup Android signing
+      - name: 🔑 Setup Android signing (optional)
         working-directory: ./flutter/android
         run: |
-          mkdir -p app
-          echo "storeFile=${{ secrets.ANDROID_KEYSTORE_FILE }}" > app/key.properties
-          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> app/key.properties
-          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" >> app/key.properties
-          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> app/key.properties
-        continue-on-error: true
-
-      - name: 📥 Download keystore (if available)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        working-directory: ./flutter/android/app
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > upload-keystore.jks
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            mkdir -p app
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/upload-keystore.jks
+            echo "storeFile=upload-keystore.jks" > app/key.properties
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> app/key.properties
+            echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" >> app/key.properties
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> app/key.properties
+          fi
         continue-on-error: true
 
       - name: 🏗️ Build APK

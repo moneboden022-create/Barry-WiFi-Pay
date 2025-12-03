@@ -30,7 +30,7 @@ jobs:
         working-directory: ./flutter
         run: flutter analyze
 
-      - name: 🪟 Enable Windows support
+      - name: 🪟 Verify Windows support
         working-directory: ./flutter
         run: flutter config --enable-windows-desktop
 
