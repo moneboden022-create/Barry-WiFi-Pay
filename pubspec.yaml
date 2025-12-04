@@ -32,7 +32,7 @@ dependencies:
   # 🌍 Localisation
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   # 📸 Image
   image_picker: ^1.0.7
@@ -42,7 +42,6 @@ dependencies:
 
   # 🌍 Géolocalisation
   geolocator: ^14.0.2
-  # ❌ NE PAS FORCER geolocator_android ici (cause l'erreur GitHub)
   geocoding: ^2.1.1
 
   # 🎨 Animations Premium
@@ -64,7 +63,6 @@ flutter:
   uses-material-design: true
   generate: true
 
-  # 📁 Assets
   assets:
     - assets/
     - assets/logo.png
