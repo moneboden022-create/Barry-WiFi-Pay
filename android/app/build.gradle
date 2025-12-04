@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace "com.barrywifi.pay"
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.barrywifi.pay"
-        minSdk 23
-        targetSdk 34
+        minSdk 21
+        targetSdk 35
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -32,6 +32,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -43,3 +44,10 @@ flutter {
     source '../..'
 }
 
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+}
+
+configurations.all {
+    resolutionStrategy.force "androidx.core:core:1.13.1"
+}
