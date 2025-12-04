@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace "com.barrywifi.pay"
-    compileSdk 35
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.barrywifi.pay"
-        minSdk 21
-        targetSdk 35
+        minSdk 23
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -19,10 +19,14 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
-            signingConfig signingConfigs.debug
         }
+    }
+
+    packagingOptions {
+        resources.excludes += ["META-INF/*", "META-INF/LICENSE*", "META-INF/NOTICE*"]
     }
 
     compileOptions {
