@@ -1,0 +1,17 @@
+name: Build Multi Platform (No Android)
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - run: flutter pub get
+      - run: flutter build web
+      - run: flutter build linux
+      - run: flutter build windows
+      - run: flutter build macos --release
+      - run: flutter build ios --release
+

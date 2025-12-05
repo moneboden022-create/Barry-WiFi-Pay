@@ -3,12 +3,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://maven.google.com' }
-        maven { url 'https://repo1.maven.org/maven2' }
+        maven { url = uri("https://jitpack.io") }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.2'
+        classpath "com.android.tools.build:gradle:8.1.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -17,9 +15,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://maven.google.com' }
-        maven { url 'https://repo1.maven.org/maven2' }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -27,10 +23,6 @@ rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-subprojects {
-    project.evaluationDependsOn(":app")
-}
-
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
