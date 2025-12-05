@@ -1,6 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permissions for network and WiFi -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    
+    <!-- Permissions for geolocation -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    
+    <!-- Permission for camera (QR scanner) -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    
     <application
-        android:label="barry_wifi"
+        android:label="BARRY WI-FI PAY"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
