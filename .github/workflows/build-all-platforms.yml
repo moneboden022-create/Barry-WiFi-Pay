@@ -1,0 +1,294 @@
+name: 🚀 Build All Platforms
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  # ============================================================
+  # ANDROID - APK + AAB
+  # ============================================================
+  build-android:
+    name: 📱 Build Android (APK + AAB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: 🔍 Flutter doctor
+        run: flutter doctor -v
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔎 Analyze code
+        run: flutter analyze || true
+
+      - name: 🏗️ Build Android APK (release)
+        run: flutter build apk --release
+
+      - name: 🏗️ Build Android AAB (release)
+        run: flutter build appbundle --release
+
+      - name: 📤 Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: 📤 Upload Android AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab-release
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  # ============================================================
+  # WINDOWS - .exe
+  # ============================================================
+  build-windows:
+    name: 🪟 Build Windows
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: 🪟 Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: 🔍 Flutter doctor
+        run: flutter doctor -v
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔎 Analyze code
+        run: flutter analyze || true
+
+      - name: 🏗️ Build Windows (release)
+        run: flutter build windows --release
+
+      - name: 📤 Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build/windows/runner/Release
+          retention-days: 30
+
+  # ============================================================
+  # LINUX - .deb + .AppImage
+  # ============================================================
+  build-linux:
+    name: 🐧 Build Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            liblzma-dev \
+            libblkid-dev \
+            libmount-dev \
+            libpango1.0-dev
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: 🐧 Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: 🔍 Flutter doctor
+        run: flutter doctor -v
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔎 Analyze code
+        run: flutter analyze || true
+
+      - name: 🏗️ Build Linux (release)
+        run: flutter build linux --release
+
+      - name: 📦 Create .deb package
+        run: |
+          cd build/linux/x64/release/bundle
+          mkdir -p debian/DEBIAN
+          cat > debian/DEBIAN/control << EOF
+          Package: barry-wifi-pay
+          Version: 2.0.0
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Barry WiFi Team
+          Description: BARRY WI-FI Pay Application
+          EOF
+          mkdir -p debian/usr/bin
+          mkdir -p debian/usr/share/applications
+          mkdir -p debian/usr/share/icons/hicolor/256x256/apps
+          cp -r * debian/usr/bin/ || true
+          dpkg-deb --build debian barry-wifi-pay-2.0.0-amd64.deb || true
+
+      - name: 📤 Upload Linux bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: build/linux/x64/release/bundle
+          retention-days: 30
+
+      - name: 📤 Upload Linux .deb (if created)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-deb-package
+          path: build/linux/x64/release/bundle/*.deb
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================
+  # macOS - .app + .dmg
+  # ============================================================
+  build-macos:
+    name: 🍎 Build macOS
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: 🍎 Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: 🔍 Flutter doctor
+        run: flutter doctor -v
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔎 Analyze code
+        run: flutter analyze || true
+
+      - name: 🏗️ Build macOS (release)
+        run: flutter build macos --release
+
+      - name: 📦 Create .dmg package
+        run: |
+          cd build/macos/Build/Products/Release
+          hdiutil create -volname "BARRY WI-FI Pay" -srcfolder . -ov -format UDZO barry-wifi-pay-2.0.0.dmg || true
+
+      - name: 📤 Upload macOS .app
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: build/macos/Build/Products/Release
+          retention-days: 30
+
+      - name: 📤 Upload macOS .dmg (if created)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-dmg-package
+          path: build/macos/Build/Products/Release/*.dmg
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================
+  # WEB - Release ZIP
+  # ============================================================
+  build-web:
+    name: 🌐 Build Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🎯 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: 🔍 Flutter doctor
+        run: flutter doctor -v
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔎 Analyze code
+        run: flutter analyze || true
+
+      - name: 🏗️ Build Web (release)
+        run: flutter build web --release --web-renderer canvaskit
+
+      - name: 📦 Create Web ZIP
+        run: |
+          cd build/web
+          zip -r barry-wifi-pay-web-2.0.0.zip .
+
+      - name: 📤 Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+          retention-days: 30
+
+      - name: 📤 Upload Web ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release-zip
+          path: build/web/*.zip
+          retention-days: 30
+

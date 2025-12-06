@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId "com.barrywifi.pay"
-        minSdkVersion flutter.minSdkVersion           // ⚠️ IMPORTANT - Fix AndroidX plugins
+        minSdkVersion 21
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "2.0.0"
         multiDexEnabled true
     }
 

@@ -49,11 +49,11 @@ dependencies:
   shimmer: ^3.0.0
 
   # 📱 Device Info
-  device_info_plus: ^10.0.5
+  device_info_plus: ^10.1.2
 
   # 🔔 Notifications
   flutter_local_notifications: ^16.3.0
-  flutter_lints: 4.0.0
+  flutter_lints: ^4.0.0
 
 dev_dependencies:
   flutter_test:
