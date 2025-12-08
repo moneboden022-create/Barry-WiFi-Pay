@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.barrywifi.pay"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // Force a valid, installed NDK to avoid corrupted downloads blocking builds.
+    ndkVersion = "26.1.10909125"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -21,8 +22,8 @@ android {
 
     defaultConfig {
         applicationId = "com.barrywifi.pay"
-        minSdk = 21
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -39,3 +40,4 @@ android {
 flutter {
     source = "../.."
 }
+
