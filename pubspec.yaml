@@ -23,7 +23,7 @@ dependencies:
 
   # 💾 Storage
   shared_preferences: ^2.2.2
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.0.0
   path_provider: ^2.1.2
 
   # 🚀 URL & Links

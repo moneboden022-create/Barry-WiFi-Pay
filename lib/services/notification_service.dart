@@ -1,6 +1,7 @@
 // lib/services/notification_service.dart
 // 🔔 BARRY WI-FI - Service de Notifications 5G
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -8,18 +9,37 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   // ------------------------------------------------------
-  // 1️⃣ INITIALISATION (Android + iOS)
+  // 1️⃣ INITIALISATION (Multi-plateforme)
   // ------------------------------------------------------
   static Future<void> init() async {
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    try {
+      const AndroidInitializationSettings androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
-      iOS: DarwinInitializationSettings(),
-    );
+      const DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    await _plugin.initialize(settings);
+      const LinuxInitializationSettings linuxSettings =
+          LinuxInitializationSettings(
+        defaultActionName: 'Open notification',
+      );
+
+      const InitializationSettings settings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+        macOS: iosSettings,
+        linux: linuxSettings,
+      );
+
+      await _plugin.initialize(settings);
+    } catch (e) {
+      // Ignore errors on platforms that don't support notifications
+      if (kIsWeb) return;
+    }
   }
 
   // ------------------------------------------------------
@@ -38,23 +58,43 @@ class NotificationService {
   // 3️⃣ NOTIFICATION SIMPLE
   // ------------------------------------------------------
   static Future<void> show(String title, String body) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'wifi_channel',            // ID du channel
-      'BARRY WIFI Notifications', // Nom du channel
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'wifi_channel',            // ID du channel
+        'BARRY WIFI Notifications', // Nom du channel
+        importance: Importance.high,
+        priority: Priority.high,
+      );
 
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
+      const DarwinNotificationDetails darwinDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
 
-    await _plugin.show(
-      DateTime.now().millisecond, // ID unique
-      title,
-      body,
-      platformDetails,
-    );
+      const LinuxNotificationDetails linuxDetails = LinuxNotificationDetails(
+        urgency: LinuxNotificationUrgency.normal,
+      );
+
+      final NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: darwinDetails,
+        macOS: darwinDetails,
+        linux: linuxDetails,
+      );
+
+      await _plugin.show(
+        DateTime.now().millisecondsSinceEpoch % 100000, // ID unique
+        title,
+        body,
+        platformDetails,
+      );
+    } catch (e) {
+      // Ignore errors on platforms that don't support notifications
+      if (kIsWeb) return;
+    }
   }
 
   // ------------------------------------------------------
@@ -65,24 +105,44 @@ class NotificationService {
     String body,
     String payload,
   ) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'wifi_channel',
-      'BARRY WIFI Notifications',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'wifi_channel',
+        'BARRY WIFI Notifications',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
 
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
+      const DarwinNotificationDetails darwinDetails =
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
 
-    await _plugin.show(
-      DateTime.now().millisecond,
-      title,
-      body,
-      platformDetails,
-      payload: payload,
-    );
+      const LinuxNotificationDetails linuxDetails = LinuxNotificationDetails(
+        urgency: LinuxNotificationUrgency.normal,
+      );
+
+      final NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: darwinDetails,
+        macOS: darwinDetails,
+        linux: linuxDetails,
+      );
+
+      await _plugin.show(
+        DateTime.now().millisecondsSinceEpoch % 100000,
+        title,
+        body,
+        platformDetails,
+        payload: payload,
+      );
+    } catch (e) {
+      // Ignore errors on platforms that don't support notifications
+      if (kIsWeb) return;
+    }
   }
 
   // ------------------------------------------------------

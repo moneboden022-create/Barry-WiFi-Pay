@@ -20,13 +20,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
+
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Flutter pub get
         run: flutter pub get
+
+      - name: Flutter analyze
+        run: flutter analyze || true
 
       - name: Build Android APK (release)
         run: flutter build apk --release
@@ -36,6 +49,7 @@ jobs:
         with:
           name: barry-wifi-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
 
   # --------------------------------------------------
   # WEB - build (release)
@@ -53,6 +67,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -65,6 +80,7 @@ jobs:
         with:
           name: barry-wifi-web-build
           path: build/web
+          retention-days: 30
 
   # --------------------------------------------------
   # WINDOWS - .exe
@@ -82,6 +98,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
@@ -97,6 +114,7 @@ jobs:
         with:
           name: barry-wifi-windows
           path: build/windows/runner/Release
+          retention-days: 30
 
   # --------------------------------------------------
   # LINUX - binaire desktop
@@ -119,6 +137,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
 
       - name: Enable Linux desktop
         run: flutter config --enable-linux-desktop
@@ -133,7 +152,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: barry-wifi-linux
-          path: build/linux/**/release
+          path: build/linux/x64/release/bundle
+          retention-days: 30
 
   # --------------------------------------------------
   # macOS - app desktop
@@ -151,6 +171,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
 
       - name: Enable macOS desktop
         run: flutter config --enable-macos-desktop
@@ -166,6 +187,7 @@ jobs:
         with:
           name: barry-wifi-macos
           path: build/macos/Build/Products/Release
+          retention-days: 30
 
   # --------------------------------------------------
   # iOS - build sans signature (no-codesign)
@@ -183,6 +205,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.24.0'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -194,4 +217,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: barry-wifi-ios
-          path: build/ios
+          path: build/ios/iphoneos/Runner.app
+          retention-days: 30

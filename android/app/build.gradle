@@ -1,43 +1,55 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
     namespace = "com.barrywifi.pay"
-    compileSdk = 35
-    // Force a valid, installed NDK to avoid corrupted downloads blocking builds.
-    ndkVersion = "26.1.10909125"
+    compileSdk = 36
+    // Use stable NDK revision
+    ndkVersion = "26.1.109091"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId = "com.barrywifi.pay"
-        minSdkVersion = flutter.minSdkVersion
+        minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug   // ⚠️ temporaire, à remplacer par ton keystore après
+            minifyEnabled false
+            shrinkResources false
         }
+    }
+
+    packagingOptions {
+        resources.excludes += [
+                "META-INF/*",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*"
+        ]
     }
 }
 
+dependencies {
+    implementation "androidx.multidex:multidex:2.0.1"   // ⚠️ Nécessaire si multiDexEnabled = true
+}
+
 flutter {
-    source = "../.."
+    source '../..'
 }
 
