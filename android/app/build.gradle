@@ -6,8 +6,7 @@ plugins {
 
 android {
     namespace = "com.barrywifi.pay"
-    compileSdk = 36
-    // Use stable NDK revision
+    compileSdk = 34
     ndkVersion = "26.1.109091"
 
     compileOptions {
@@ -21,8 +20,8 @@ android {
 
     defaultConfig {
         applicationId = "com.barrywifi.pay"
-        minSdk = flutter.minSdkVersion
-        targetSdk = 35
+        minSdk = 23
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
@@ -37,11 +36,13 @@ android {
     }
 
     packagingOptions {
-        resources.excludes += [
-                "META-INF/*",
-                "META-INF/LICENSE*",
-                "META-INF/NOTICE*"
-        ]
+        resources {
+            excludes += [
+                    "META-INF/*",
+                    "META-INF/LICENSE*",
+                    "META-INF/NOTICE*"
+            ]
+        }
     }
 }
 

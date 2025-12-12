@@ -28,5 +28,13 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow camera access to scan QR codes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow photo library access when selecting images.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow microphone access for media capture.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Allow location access to improve Wi-Fi services.</string>
 </dict>
 </plist>

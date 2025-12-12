@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow camera access to scan QR codes and validate connections.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow photo library access for selecting images when needed.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow microphone access for video capture features.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow location access to find nearby Wi-Fi services.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow location access to improve Wi-Fi experience.</string>
 </dict>
 </plist>
