@@ -1,6 +1,6 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -12,12 +12,12 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.barrywifi.pay"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.barrywifi.pay"
-        minSdk = 23
-        targetSdk = 35
+        minSdk = 21
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         multiDexEnabled = true
@@ -38,13 +38,15 @@ android {
         }
     }
 
-    packagingOptions {
-        resources.excludes += ["META-INF/*"]
+    packaging {
+        resources {
+            excludes += "META-INF/*"
+        }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {

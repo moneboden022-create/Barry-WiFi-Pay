@@ -843,7 +843,7 @@ class _VoucherGeneratorScreenState extends State<VoucherGeneratorScreen>
                 size: 200,
               ),
             const SizedBox(height: 16),
-            Text('${voucher.label ?? "Voucher"}'),
+            Text(voucher.label ?? "Voucher"),
             Text('${_formatPrice(voucher.price)} GNF'),
           ],
         ),

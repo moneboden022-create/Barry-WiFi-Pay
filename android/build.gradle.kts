@@ -1,13 +1,13 @@
 buildscript {
-    ext.kotlin_version = "1.9.23"
+    val kotlin_version = "1.9.24"
     repositories {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.1.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("com.android.tools.build:gradle:8.0.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
 
@@ -24,5 +24,5 @@ subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete(rootProject.buildDir)
 }

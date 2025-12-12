@@ -1,0 +1,86 @@
+workflows:
+  android_apk:
+    name: Android APK
+    environment:
+      flutter: stable
+      java: "17"
+    scripts:
+      - name: Flutter clean & pub get
+        script: |
+          flutter clean
+          flutter pub get
+      - name: Flutter analyze
+        script: |
+          flutter analyze
+      - name: Optional keystore setup
+        script: |
+          if [ -n "$CM_KEYSTORE" ]; then
+            cd android
+            echo "$CM_KEYSTORE" | base64 --decode > keystore.jks
+            cat > key.properties <<EOF
+storePassword=$CM_KEYSTORE_PASSWORD
+keyPassword=$CM_KEY_PASSWORD
+keyAlias=$CM_KEY_ALIAS
+storeFile=keystore.jks
+EOF
+          else
+            echo "CM_KEYSTORE not provided; using debug signing."
+          fi
+      - name: Build APK (release)
+        script: |
+          flutter build apk --release --no-shrink --no-tree-shake-icons
+    artifacts:
+      - build/app/outputs/**/*.apk
+
+  android_aab:
+    name: Android AAB
+    environment:
+      flutter: stable
+      java: "17"
+    scripts:
+      - name: Flutter clean & pub get
+        script: |
+          flutter clean
+          flutter pub get
+      - name: Flutter analyze
+        script: |
+          flutter analyze
+      - name: Optional keystore setup
+        script: |
+          if [ -n "$CM_KEYSTORE" ]; then
+            cd android
+            echo "$CM_KEYSTORE" | base64 --decode > keystore.jks
+            cat > key.properties <<EOF
+storePassword=$CM_KEYSTORE_PASSWORD
+keyPassword=$CM_KEY_PASSWORD
+keyAlias=$CM_KEY_ALIAS
+storeFile=keystore.jks
+EOF
+          else
+            echo "CM_KEYSTORE not provided; using debug signing."
+          fi
+      - name: Build AAB (release)
+        script: |
+          flutter build appbundle --release --no-shrink --no-tree-shake-icons
+    artifacts:
+      - build/app/outputs/**/*.aab
+
+  web_release:
+    name: Web Release
+    environment:
+      flutter: stable
+      java: "17"
+    scripts:
+      - name: Flutter clean & pub get
+        script: |
+          flutter clean
+          flutter pub get
+      - name: Flutter analyze
+        script: |
+          flutter analyze
+      - name: Build web
+        script: |
+          flutter build web --release
+    artifacts:
+      - build/web/**
+

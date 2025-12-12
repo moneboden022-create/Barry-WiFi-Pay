@@ -324,7 +324,6 @@ class _AppDrawerState extends State<AppDrawer>
 
   Widget _buildMenuItem(_DrawerMenuItem item, int index) {
     final isActive = widget.currentRoute == item.route;
-    final delay = Duration(milliseconds: 50 * index);
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),

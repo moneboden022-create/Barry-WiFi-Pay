@@ -47,7 +47,7 @@ class AppTheme {
       ),
 
       // Cards
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkCard,
         elevation: 8,
         shadowColor: AppColors.neonViolet.withOpacity(0.2),
@@ -158,7 +158,7 @@ class AppTheme {
       ),
 
       // Dialogs
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.darkCard,
         elevation: 24,
         shape: RoundedRectangleBorder(
@@ -227,7 +227,7 @@ class AppTheme {
       ),
 
       // TabBar
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: AppColors.neonViolet,
         unselectedLabelColor: AppColors.textMuted,
         indicatorColor: AppColors.neonViolet,
@@ -284,7 +284,7 @@ class AppTheme {
         ),
       ),
 
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.lightCard,
         elevation: 4,
         shadowColor: AppColors.neonViolet.withOpacity(0.1),
