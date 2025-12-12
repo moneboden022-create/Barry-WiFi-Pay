@@ -7,7 +7,6 @@ plugins {
 android {
     namespace = "com.barrywifi.pay"
     compileSdk = 34
-    ndkVersion = "26.1.109091"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -35,7 +34,7 @@ android {
         }
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += [
                     "META-INF/*",
@@ -44,6 +43,10 @@ android {
             ]
         }
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
