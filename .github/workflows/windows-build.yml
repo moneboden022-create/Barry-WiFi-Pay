@@ -11,6 +11,7 @@ jobs:
     defaults:
       run:
         shell: pwsh
+        working-directory: flutter
     steps:
       - name: Checkout
         uses: actions/checkout@v4
