@@ -27,7 +27,7 @@ android {
 
     defaultConfig {
         applicationId = "com.barrywifi.pay"
-        minSdkVersion = flutter.minSdkVersion
+        minSdkVersion = 21
         targetSdkVersion = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
